@@ -1,0 +1,54 @@
+<% if flash[:notice] %>
+     <p id="notice">
+       <%= flash[:notice] %>
+     </p>
+<% end %>
+
+<%= render 'users/user_info', user: @book.user %>
+
+<%= render 'books/new', book: @book_new %>
+
+
+<h1>Book detail</h1>
+    <h4>name</h4>
+      <%= @book.title %>
+    <h4>Opinion</h4>
+      <%= @book.body %>
+    
+    <%= link_to "Edit", edit_book_path(@book.id) %>
+    <%= link_to "Destroy", book_path(@book.id), method: :delete, "data-confirm" => "本当に削除しますか？" %>
+    
+    <% if @book.favorited_by?(current_user) %>
+    <p>
+      <%= link_to book_favorites_path(@book), method: :delete do %>
+        ♥<%= @book.favorites.count %> いいね
+      <% end %>
+    </p>
+    <% else %>
+    <p>
+      <%= link_to book_favorites_path(@book), method: :post do %>
+        ♡<%= @book.favorites.count %> いいね
+      <% end %>
+    </p>
+    <% end %>
+      
+    <div>
+  <p>コメント件数：<%= @book.post_comments.count %></p>
+   <% @book.post_comments.each do |post_comment| %>
+    <p><%= image_tag post_comment.user.get_profile_image %></p>
+    <%= post_comment.user.name %>
+    <%= post_comment.created_at.strftime('%Y/%m/%d') %><%= post_comment.comment %>
+    <% if post_comment.user == current_user %>
+      <%= link_to "削除", book_post_comment_path(post_comment.book, post_comment), method: :delete %>
+      <!--↑引数について；どの投稿に対するコメントを消去したいのかを、消去するためにデータとして受け渡しタイからこのひきすう-->
+    <% end %>
+   <% end %>
+    </div>
+    
+    <div>
+     <%= form_with model: [@book, @post_comment] do |f| %>
+       <%= f.text_area :comment, rows: '5', placeholder: "コメントをここに" %>
+       <%= f.submit "送信する" %>
+     <% end %>
+    </div>  
+      
